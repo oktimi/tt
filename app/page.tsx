@@ -179,7 +179,7 @@ export default async function Home() {
                     <div className="w-1 h-4 bg-gradient-brand rounded-full" />
                     最新资讯
                   </h2>
-                  <Link href="/news" className="text-xs" className="link-gradient">更多</Link>
+                  <Link href="/news" className="text-xs link-gradient">更多</Link>
                 </div>
                 <div className="card divide-y">
                   {newsList.length > 0 ? newsList.map((article) => (
@@ -216,7 +216,7 @@ export default async function Home() {
                     <TrendingUp className="w-4 h-4" style={{color: 'var(--color-accent-green)'}} />
                     {liveMatches.length > 0 ? '进行中' : '实时比分'}
                   </h2>
-                  <Link href="/scores" className="text-xs" className="link-gradient">全部</Link>
+                  <Link href="/scores" className="text-xs link-gradient">全部</Link>
                 </div>
                 <div className="divide-y">
                   {(liveMatches.length > 0 ? liveMatches : matches.slice(0, 5)).map((m) => (
@@ -269,7 +269,7 @@ export default async function Home() {
               <div className="card">
                 <div className="flex items-center justify-between px-4 py-3 border-b">
                   <h3 className="font-bold text-sm text-primary">英超积分榜</h3>
-                  <Link href="/league/premier-league/standings" className="text-xs" className="link-gradient">完整</Link>
+                  <Link href="/league/premier-league/standings" className="text-xs link-gradient">完整</Link>
                 </div>
                 {footballStandings.length > 0 ? (
                   <div className="text-xs">
@@ -301,7 +301,7 @@ export default async function Home() {
               <div className="card">
                 <div className="flex items-center justify-between px-4 py-3 border-b">
                   <h3 className="font-bold text-sm text-primary">NBA排行榜</h3>
-                  <Link href="/league/nba/standings" className="text-xs" className="link-gradient">完整</Link>
+                  <Link href="/league/nba/standings" className="text-xs link-gradient">完整</Link>
                 </div>
                 {basketballStandings.length > 0 ? (
                   <div className="text-xs">
