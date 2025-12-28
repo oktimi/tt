@@ -1,8 +1,11 @@
-import Link from 'next/link';
-import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ArticleCard from '@/components/ArticleCard';
+import ScoreCard from '@/components/ScoreCard';
 import pool from '@/lib/db';
+import { getTranslations } from '@/lib/i18n';
+
+const t = getTranslations('zh');
 
 async function getArticles() {
   try {
@@ -31,167 +34,87 @@ async function getMatches() {
 
 export default async function Home() {
   const [articles, matches] = await Promise.all([getArticles(), getMatches()]);
-  const featured = articles[0];
-  const secondary = articles.slice(1, 3);
-  const rest = articles.slice(3);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
 
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          {/* 头条区域 */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-            {/* 主头条 */}
-            {featured ? (
-              <Link href={`/${featured.slug}`} className="lg:col-span-2 group">
-                <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                  {featured.image_url && (
-                    <Image
-                      src={featured.image_url}
-                      alt={featured.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition duration-300"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    {featured.league && (
-                      <span className="inline-block bg-primary text-white text-xs font-bold px-2 py-1 rounded mb-2">
-                        {featured.league}
-                      </span>
-                    )}
-                    <h1 className="text-white text-2xl lg:text-3xl font-bold leading-tight">
-                      {featured.title}
-                    </h1>
-                  </div>
-                </div>
-              </Link>
-            ) : (
-              <div className="lg:col-span-2 aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">暂无头条文章</p>
-              </div>
-            )}
-
-            {/* 副头条 */}
-            <div className="flex flex-col gap-4">
-              {secondary.map((article) => (
-                <Link key={article.id} href={`/${article.slug}`} className="group flex-1">
-                  <div className="relative h-full min-h-[140px] bg-gray-200 rounded-lg overflow-hidden">
-                    {article.image_url && (
-                      <Image
-                        src={article.image_url}
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition duration-300"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      {article.league && (
-                        <span className="inline-block bg-primary text-white text-xs font-bold px-2 py-1 rounded mb-1">
-                          {article.league}
-                        </span>
-                      )}
-                      <h2 className="text-white text-sm font-bold leading-tight line-clamp-2">
-                        {article.title}
-                      </h2>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-              {secondary.length === 0 && (
-                <div className="flex-1 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <p className="text-gray-500 text-sm">暂无文章</p>
-                </div>
-              )}
-            </div>
+        {/* Hero Section */}
+        <section className="relative py-16 md:py-24">
+          {/* Decorative lines */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 left-1/2 w-px h-24 bg-gradient-to-b from-transparent via-border-light dark:via-border-dark to-transparent" />
+            <div className="absolute bottom-0 left-1/2 w-px h-24 bg-gradient-to-t from-transparent via-border-light dark:via-border-dark to-transparent" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* 文章列表 */}
-            <div className="lg:col-span-2">
-              <h2 className="text-xl font-bold mb-4 border-l-4 border-primary pl-3">最新资讯</h2>
-              <div className="space-y-4">
-                {rest.map((article) => (
-                  <Link
-                    key={article.id}
-                    href={`/${article.slug}`}
-                    className="flex gap-4 group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
-                  >
-                    <div className="relative w-40 h-24 flex-shrink-0">
-                      {article.image_url ? (
-                        <Image
-                          src={article.image_url}
-                          alt={article.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200" />
-                      )}
-                    </div>
-                    <div className="flex-1 py-2 pr-4">
-                      {article.league && (
-                        <span className="text-primary text-xs font-bold">{article.league}</span>
-                      )}
-                      <h3 className="font-bold text-sm group-hover:text-primary transition line-clamp-2">
-                        {article.title}
-                      </h3>
-                      {article.team_a && article.team_b && (
-                        <p className="text-gray-500 text-xs mt-1">
-                          {article.team_a} vs {article.team_b}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-                {rest.length === 0 && (
-                  <div className="bg-white rounded-lg p-8 text-center text-gray-500">
-                    暂无更多文章
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 侧边栏 - 比分 */}
-            <div>
-              <h2 className="text-xl font-bold mb-4 border-l-4 border-primary pl-3">实时比分</h2>
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                {matches.map((match, index) => (
-                  <div
-                    key={match.id}
-                    className={`p-4 ${index > 0 ? 'border-t border-gray-100' : ''}`}
-                  >
-                    <div className="text-xs text-gray-500 mb-2">{match.league}</div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">{match.team_a}</span>
-                      <span className="font-bold text-lg">
-                        {match.status === 'finished'
-                          ? `${match.score_a} - ${match.score_b}`
-                          : match.status === 'live'
-                          ? 'LIVE'
-                          : 'VS'}
-                      </span>
-                      <span className="font-medium text-sm">{match.team_b}</span>
-                    </div>
-                    {match.status === 'live' && (
-                      <div className="text-center mt-1">
-                        <span className="inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded animate-pulse">
-                          进行中
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {matches.length === 0 && (
-                  <div className="p-8 text-center text-gray-500">暂无比赛</div>
-                )}
-              </div>
-            </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+            <p className="section-title mb-4 flex items-center justify-center gap-2">
+              <span className="w-2 h-2 bg-primary rounded-sm" />
+              {t.home.mediaTitle}
+            </p>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white mb-6">
+              {t.site.name}
+            </h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              {t.home.mediaSubtitle}
+            </p>
           </div>
+        </section>
+
+        {/* Divider */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="divider-horizontal" />
         </div>
+
+        {/* Content Grid */}
+        <section className="py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Articles */}
+              <div className="lg:col-span-2">
+                <h2 className="section-title mb-6">{t.home.latestNews}</h2>
+                
+                {articles.length > 0 ? (
+                  <div className="space-y-4">
+                    {articles.map((article, index) => (
+                      <ArticleCard 
+                        key={article.id} 
+                        article={article}
+                        variant={index === 0 ? 'featured' : 'default'}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="card p-12 text-center">
+                    <p className="text-slate-500 dark:text-slate-400">
+                      {t.home.noArticles}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Sidebar - Scores */}
+              <div>
+                <h2 className="section-title mb-6">{t.home.liveScores}</h2>
+                
+                {matches.length > 0 ? (
+                  <div className="space-y-4">
+                    {matches.map((match) => (
+                      <ScoreCard key={match.id} match={match} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="card p-12 text-center">
+                    <p className="text-slate-500 dark:text-slate-400">
+                      {t.home.noMatches}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

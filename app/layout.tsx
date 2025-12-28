@@ -1,16 +1,37 @@
 import type { Metadata } from 'next';
+import { getTranslations } from '@/lib/i18n';
 import './globals.css';
 
+const t = getTranslations('zh');
+
 export const metadata: Metadata = {
-  title: 'Valuo Sports - 实时比分与AI深度解读',
-  description: '专业体育新闻平台，提供实时比分、AI赛事解读、球员数据对比',
+  title: `${t.site.name} - ${t.site.tagline}`,
+  description: t.site.tagline,
   icons: { icon: '/favicon.png' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN">
-      <body className="bg-gray-100 text-gray-900">{children}</body>
+    <html lang="zh-CN" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('valuo-theme');
+                  if (theme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen">
+        {children}
+      </body>
     </html>
   );
 }

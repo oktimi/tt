@@ -1,3 +1,152 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #0a0f1a;
+  
+  --color-card-light: #f8fafc;
+  --color-card-dark: #111827;
+  
+  --color-border-light: #e2e8f0;
+  --color-border-dark: #1f2937;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface-light text-slate-900 antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .dark body {
+    @apply bg-surface-dark text-slate-50;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-border-light rounded-lg;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .dark .card {
+    @apply bg-card-dark border-border-dark;
+  }
+
+  .section-title {
+    @apply text-xs font-medium tracking-widest uppercase text-slate-500;
+  }
+
+  .dark .section-title {
+    @apply text-slate-400;
+  }
+
+  .nav-link {
+    @apply text-sm font-medium text-slate-600 transition-colors;
+  }
+
+  .nav-link:hover {
+    @apply text-slate-900;
+  }
+
+  .dark .nav-link {
+    @apply text-slate-300;
+  }
+
+  .dark .nav-link:hover {
+    @apply text-white;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border border-border-light rounded-md transition-colors;
+  }
+
+  .btn-primary:hover {
+    @apply bg-slate-100;
+  }
+
+  .dark .btn-primary {
+    @apply border-border-dark;
+  }
+
+  .dark .btn-primary:hover {
+    @apply bg-slate-800;
+  }
+
+  .divider-horizontal {
+    @apply h-px w-full bg-border-light;
+  }
+
+  .dark .divider-horizontal {
+    @apply bg-border-dark;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Typography for article content */
+.prose {
+  @apply text-slate-700;
+}
+
+.dark .prose {
+  @apply text-slate-300;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  @apply text-slate-900;
+}
+
+.dark .prose h1, .dark .prose h2, .dark .prose h3, .dark .prose h4 {
+  @apply text-white;
+}
+
+.prose a {
+  @apply text-primary;
+}
+
+.prose a:hover {
+  @apply text-primary-dark;
+}
+
+.prose strong {
+  @apply text-slate-900;
+}
+
+.dark .prose strong {
+  @apply text-white;
+}
+
+.prose code {
+  @apply bg-slate-100 px-1 py-0.5 rounded text-sm;
+}
+
+.dark .prose code {
+  @apply bg-slate-800;
+}
+
+.prose pre {
+  @apply bg-slate-100;
+}
+
+.dark .prose pre {
+  @apply bg-slate-800;
+}
+
+.prose blockquote {
+  @apply border-l-primary text-slate-600;
+}
+
+.dark .prose blockquote {
+  @apply text-slate-400;
+}
