@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'Valuo Sports - 实时比分与AI深度解读',
   description: '专业体育新闻平台，提供实时比分、AI赛事解读、球员数据对比',
   icons: {
-    icon: '/logo.svg',
+    icon: '/favicon.png',
   },
 };
 
