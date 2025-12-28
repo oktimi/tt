@@ -14,7 +14,8 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=10567
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-EXPOSE 3000
+EXPOSE 10567
 CMD ["node", "server.js"]

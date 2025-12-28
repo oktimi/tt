@@ -4,7 +4,7 @@ services:
   app:
     image: ghcr.io/${GITHUB_REPOSITORY}:latest
     ports:
-      - "3000:3000"
+      - "10567:10567"
     environment:
       - DB_HOST=mysql
       - DB_USER=${DB_USER}
