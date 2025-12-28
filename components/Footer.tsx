@@ -1,98 +1,38 @@
 import Link from 'next/link';
-import { getTranslations } from '@/lib/i18n';
-
-const t = getTranslations('zh');
-
-const footerLinks = {
-  categories: [
-    { label: t.nav.football, href: '/category/football' },
-    { label: t.nav.basketball, href: '/category/basketball' },
-    { label: t.nav.tennis, href: '/category/tennis' },
-  ],
-  leagues: [
-    { label: 'NBA', href: '/league/nba' },
-    { label: 'Premier League', href: '/league/premier-league' },
-    { label: 'La Liga', href: '/league/la-liga' },
-  ],
-  about: [
-    { label: t.footer.aboutUs, href: '/about' },
-    { label: t.footer.contact, href: '/contact' },
-  ],
-  social: [
-    { label: t.footer.weibo, href: '#' },
-    { label: t.footer.wechat, href: '#' },
-  ],
-};
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="border-t border-border-light dark:border-border-dark mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <footer className="surface border-t mt-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="col-span-2 md:col-span-1">
+            <span className="text-lg font-bold text-gradient">瓦罗体育</span>
+            <p className="text-sm text-secondary mt-2">专业足球篮球资讯平台</p>
+          </div>
           <div>
-            <h3 className="section-title mb-4">{t.footer.categories}</h3>
-            <ul className="space-y-3">
-              {footerLinks.categories.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="nav-link text-sm">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+            <h3 className="font-bold text-sm mb-3 text-primary">分类</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/category/football" className="text-secondary hover:text-primary">足球</Link></li>
+              <li><Link href="/category/basketball" className="text-secondary hover:text-primary">篮球</Link></li>
             </ul>
           </div>
-
           <div>
-            <h3 className="section-title mb-4">{t.footer.leagues}</h3>
-            <ul className="space-y-3">
-              {footerLinks.leagues.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="nav-link text-sm">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+            <h3 className="font-bold text-sm mb-3 text-primary">联赛</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/league/premier-league" className="text-secondary hover:text-primary">英超</Link></li>
+              <li><Link href="/league/nba" className="text-secondary hover:text-primary">NBA</Link></li>
             </ul>
           </div>
-
           <div>
-            <h3 className="section-title mb-4">{t.footer.about}</h3>
-            <ul className="space-y-3">
-              {footerLinks.about.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="nav-link text-sm">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="section-title mb-4">{t.footer.followUs}</h3>
-            <ul className="space-y-3">
-              {footerLinks.social.map((link) => (
-                <li key={link.label}>
-                  <a 
-                    href={link.href} 
-                    className="nav-link text-sm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
+            <h3 className="font-bold text-sm mb-3 text-primary">关于</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/about" className="text-secondary hover:text-primary">关于我们</Link></li>
+              <li><Link href="/contact" className="text-secondary hover:text-primary">联系我们</Link></li>
             </ul>
           </div>
         </div>
-
-        <div className="divider-horizontal mt-12 mb-8" />
-
-        <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-          {currentYear} {t.site.name}. {t.footer.copyright}.
+        <div className="border-t mt-6 pt-6 text-center text-xs text-secondary">
+          {new Date().getFullYear()} 瓦罗体育
         </div>
       </div>
     </footer>

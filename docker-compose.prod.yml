@@ -11,9 +11,23 @@ services:
       - CLAUDE_BASE_URL=https://code.newcli.com/claude/droid
       - CLAUDE_API_KEY=sk-ant-oat01-3ddcg87AvOpA-NXPh9hcd6Pacpc2G8xHnSgPVAcbGRRFL2QgoTj4sZhggrchhfAAtEMBPYtQ9GVgyCBNEY6WBvMmAfImPAA
       - IMAGE_WORKER_URL=https://valuo.a-374.workers.dev
+      - CRON_SECRET=valuo-cron-secret-2024
     depends_on:
       mysql:
         condition: service_healthy
+    restart: unless-stopped
+
+  scheduler:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts:ro
+    environment:
+      - APP_URL=http://app:10567
+      - CRON_SECRET=valuo-cron-secret-2024
+    command: node /app/scripts/scheduler.mjs
+    depends_on:
+      - app
     restart: unless-stopped
 
   mysql:

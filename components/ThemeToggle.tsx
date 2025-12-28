@@ -1,63 +1,38 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { SunIcon, MoonIcon } from './Icons';
-import { getTranslations } from '@/lib/i18n';
-
-const t = getTranslations('zh');
-const STORAGE_KEY = 'valuo-theme';
+import * as Switch from '@radix-ui/react-switch';
+import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [dark, setDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem(STORAGE_KEY) as 'light' | 'dark' | null;
-    if (stored) {
-      setTheme(stored);
-    }
+    setDark(document.documentElement.classList.contains('dark'));
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
-    
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme, mounted]);
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }, [dark, mounted]);
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
-
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return (
-      <button
-        className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        aria-label={t.theme.dark}
-      >
-        <MoonIcon className="text-slate-400" />
-      </button>
-    );
-  }
+  if (!mounted) return <div className="w-[52px] h-7" />;
 
   return (
-    <button
-      onClick={toggleTheme}
-      className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-      aria-label={theme === 'dark' ? t.theme.light : t.theme.dark}
-    >
-      {theme === 'dark' ? (
-        <SunIcon className="text-slate-400 hover:text-slate-200" />
-      ) : (
-        <MoonIcon className="text-slate-600 hover:text-slate-900" />
-      )}
-    </button>
+    <div className="flex items-center gap-2">
+      <Sun className="w-4 h-4 text-secondary" />
+      <Switch.Root
+        checked={dark}
+        onCheckedChange={setDark}
+        className="w-11 h-6 rounded-full relative cursor-pointer outline-none"
+        style={{ backgroundColor: dark ? 'var(--color-accent-blue)' : 'var(--border)' }}
+      >
+        <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow transition-transform duration-100 translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
+      </Switch.Root>
+      <Moon className="w-4 h-4 text-secondary" />
+    </div>
   );
 }

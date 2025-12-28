@@ -4,11 +4,8 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import { ChevronRightIcon } from '@/components/Icons';
 import db from '@/lib/db';
-import { getTranslations } from '@/lib/i18n';
-
-const t = getTranslations('zh');
+import { Clock, ChevronRight } from 'lucide-react';
 
 interface Props {
   params: Promise<{ slug: string[] }>;
@@ -24,17 +21,20 @@ export async function generateMetadata({ params }: Props) {
     [fullSlug]
   );
   const article = (rows as any[])[0];
-  if (!article) return { title: t.article.home };
-  return { title: article.meta_title, description: article.meta_description };
+  if (!article) return { title: '文章未找到 - 瓦罗体育' };
+  return { title: `${article.meta_title} - 瓦罗体育`, description: article.meta_description };
 }
 
 function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}/${month}/${day}`;
+  const d = new Date(dateString);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
+
+const typeLabels: Record<string, string> = {
+  news: '快讯',
+  report: '战报',
+  analysis: '深度解读',
+};
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
@@ -47,109 +47,143 @@ export default async function ArticlePage({ params }: Props) {
   const article = (rows as any[])[0];
   if (!article) notFound();
 
-  const typeLabels: Record<string, string> = {
-    news: t.article.news,
-    report: t.article.report,
-    analysis: t.article.analysis,
-  };
+  const [relatedRows] = await db.execute(
+    `SELECT id, slug, title, image_url FROM articles 
+     WHERE status = 'published' AND league = ? AND id != ? 
+     ORDER BY created_at DESC LIMIT 4`,
+    [article.league, article.id]
+  );
+  const related = relatedRows as any[];
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
 
       <main className="flex-1">
-        <article className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-8">
-            <Link href="/" className="hover:text-primary transition-colors">
-              {t.article.home}
-            </Link>
-            <ChevronRightIcon size={14} />
-            {article.league && (
-              <>
-                <Link 
-                  href={`/category/${article.league}`} 
-                  className="hover:text-primary transition-colors"
-                >
-                  {article.league}
-                </Link>
-                <ChevronRightIcon size={14} />
-              </>
-            )}
-            <span className="text-slate-400 dark:text-slate-500 truncate max-w-[200px]">
-              {article.title}
-            </span>
-          </nav>
+        <div className="max-w-6xl mx-auto px-4 py-4 md:py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* 文章 */}
+            <article className="lg:col-span-8">
+              {/* 面包屑 */}
+              <nav className="flex items-center gap-1 text-sm text-secondary mb-4 flex-wrap">
+                <Link href="/" className="hover:text-primary">首页</Link>
+                <ChevronRight className="w-4 h-4" />
+                {article.league && (
+                  <>
+                    <span>{article.league}</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </>
+                )}
+                <span className="truncate max-w-[150px]">正文</span>
+              </nav>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {article.league && (
-              <span className="px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
-                {article.league}
-              </span>
-            )}
-            {article.type && typeLabels[article.type] && (
-              <span className="px-3 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-full">
-                {typeLabels[article.type]}
-              </span>
-            )}
-          </div>
+              {/* 标签 */}
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                {article.league && (
+                  <span className="bg-gradient-brand text-black text-xs font-bold px-2 py-0.5 rounded">
+                    {article.league}
+                  </span>
+                )}
+                {article.type && typeLabels[article.type] && (
+                  <span className="surface text-secondary text-xs px-2 py-0.5 rounded">
+                    {typeLabels[article.type]}
+                  </span>
+                )}
+              </div>
 
-          {/* Title */}
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6 text-balance">
-            {article.title}
-          </h1>
+              {/* 标题 */}
+              <h1 className="text-xl md:text-2xl font-bold leading-tight mb-3">{article.title}</h1>
 
-          {/* Meta */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-8 pb-8 border-b border-border-light dark:border-border-dark">
-            <time dateTime={article.published_at || article.created_at}>
-              {formatDate(article.published_at || article.created_at)}
-            </time>
-            {article.team_a && article.team_b && (
-              <span className="flex items-center gap-2">
-                <span className="w-1 h-1 bg-slate-400 rounded-full" />
-                {article.team_a} vs {article.team_b}
-              </span>
-            )}
-            {article.score && (
-              <span className="flex items-center gap-2">
-                <span className="w-1 h-1 bg-slate-400 rounded-full" />
-                {article.score}
-              </span>
-            )}
-          </div>
+              {/* 元信息 */}
+              <div className="flex flex-wrap items-center gap-3 text-sm text-secondary mb-4 pb-4 border-b">
+                <span className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  {formatDate(article.published_at || article.created_at)}
+                </span>
+                {article.team_a && article.team_b && (
+                  <>
+                    <span>·</span>
+                    <span>{article.team_a} vs {article.team_b}</span>
+                  </>
+                )}
+                {article.score && (
+                  <>
+                    <span>·</span>
+                    <span className="text-gradient font-bold">{article.score}</span>
+                  </>
+                )}
+              </div>
 
-          {/* Featured Image */}
-          {article.image_url && (
-            <div className="relative aspect-video mb-10 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
-              <Image
-                src={article.image_url}
-                alt={article.image_alt || article.title}
-                fill
-                className="object-cover"
-                priority
+              {/* 头图 */}
+              {article.image_url && (
+                <div className="relative aspect-video mb-6 rounded-lg overflow-hidden">
+                  <Image src={article.image_url} alt={article.image_alt || article.title} fill className="object-cover" priority />
+                </div>
+              )}
+
+              {/* 正文 */}
+              <div className="card p-4 md:p-6">
+                <MarkdownRenderer content={article.content} />
+              </div>
+
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                  __html: JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'NewsArticle',
+                    headline: article.title,
+                    image: article.image_url,
+                    datePublished: article.published_at || article.created_at,
+                    author: { '@type': 'Organization', name: '瓦罗体育' },
+                  }),
+                }}
               />
-            </div>
-          )}
+            </article>
 
-          {/* Content */}
-          <MarkdownRenderer content={article.content} />
+            {/* 侧边栏 */}
+            <aside className="lg:col-span-4 space-y-4">
+              {related.length > 0 && (
+                <div className="card">
+                  <div className="px-4 py-3 border-b">
+                    <h3 className="font-bold text-sm">相关报道</h3>
+                  </div>
+                  <div className="divide-y">
+                    {related.map((r) => (
+                      <Link key={r.id} href={`/${r.slug}`} className="flex gap-3 p-3 hover-bg transition-colors">
+                        {r.image_url && (
+                          <div className="relative w-16 h-12 flex-shrink-0 rounded overflow-hidden">
+                            <Image src={r.image_url} alt={r.title} fill className="object-cover" />
+                          </div>
+                        )}
+                        <span className="text-sm line-clamp-2 hover:text-[#00d2ff] transition-colors">{r.title}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* JSON-LD */}
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'NewsArticle',
-                headline: article.title,
-                image: article.image_url,
-                datePublished: article.published_at || article.created_at,
-                author: { '@type': 'Organization', name: t.site.name },
-              }),
-            }}
-          />
-        </article>
+              <div className="card">
+                <div className="px-4 py-3 border-b">
+                  <h3 className="font-bold text-sm">热门联赛</h3>
+                </div>
+                <div className="p-2">
+                  {[
+                    { name: '英超', href: '/league/premier-league' },
+                    { name: '西甲', href: '/league/la-liga' },
+                    { name: 'NBA', href: '/league/nba' },
+                    { name: 'CBA', href: '/league/cba' },
+                  ].map((l) => (
+                    <Link key={l.href} href={l.href} className="block px-3 py-2.5 text-sm rounded-md hover-bg">
+                      {l.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
       </main>
 
       <Footer />

@@ -1,35 +1,30 @@
 import type { Metadata } from 'next';
-import { getTranslations } from '@/lib/i18n';
 import './globals.css';
 
-const t = getTranslations('zh');
-
 export const metadata: Metadata = {
-  title: `${t.site.name} - ${t.site.tagline}`,
-  description: t.site.tagline,
+  title: '瓦罗体育 - 足球篮球实时比分与深度解读',
+  description: '瓦罗体育提供足球、篮球实时比分、赛事战报、AI深度解读',
   icons: { icon: '/favicon.png' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN" className="dark" suppressHydrationWarning>
+    <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                try {
-                  var theme = localStorage.getItem('valuo-theme');
-                  if (theme === 'light') {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {}
+                var theme = localStorage.getItem('theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark');
+                }
               })();
             `,
           }}
         />
       </head>
-      <body className="min-h-screen">
+      <body className="antialiased min-h-screen">
         {children}
       </body>
     </html>
