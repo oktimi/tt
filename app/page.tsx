@@ -1,11 +1,7 @@
-import {
-  Box, Container, Grid, Card, CardContent, CardMedia, CardActionArea,
-  Typography, List, ListItem, ListItemText, ListItemAvatar, Avatar,
-  Chip, Paper, Divider, AppBar, Toolbar, IconButton, Drawer,
-} from '@mui/material';
-import { Menu, Search } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import pool from '@/lib/db';
 
 async function getArticles() {
@@ -25,19 +21,7 @@ async function getMatches() {
   try {
     const [rows] = await pool.query(
       `SELECT id, league, team_a, team_b, score_a, score_b, match_time, status
-       FROM matches ORDER BY match_time DESC LIMIT 5`
-    );
-    return rows as any[];
-  } catch {
-    return [];
-  }
-}
-
-async function getLeagues() {
-  try {
-    const [rows] = await pool.query(
-      `SELECT league, COUNT(*) as count FROM articles
-       WHERE status = 'published' GROUP BY league ORDER BY count DESC`
+       FROM matches ORDER BY match_time DESC LIMIT 6`
     );
     return rows as any[];
   } catch {
@@ -46,145 +30,171 @@ async function getLeagues() {
 }
 
 export default async function Home() {
-  const [articles, matches, leagues] = await Promise.all([
-    getArticles(),
-    getMatches(),
-    getLeagues(),
-  ]);
-
+  const [articles, matches] = await Promise.all([getArticles(), getMatches()]);
   const featured = articles[0];
-  const restArticles = articles.slice(1);
+  const secondary = articles.slice(1, 3);
+  const rest = articles.slice(3);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <AppBar position="static" color="transparent" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Toolbar>
-          <Image src="/logo.svg" alt="Valuo" width={32} height={32} />
-          <Typography variant="h6" sx={{ ml: 1, fontWeight: 600 }}>Valuo Sports</Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          <IconButton><Search size={20} /></IconButton>
-        </Toolbar>
-      </AppBar>
+    <div className="min-h-screen flex flex-col">
+      <Header />
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Grid container spacing={3}>
-          {/* 主内容区 */}
-          <Grid item xs={12} md={8}>
-            {/* 头条文章 */}
-            {featured && (
-              <Card sx={{ mb: 3 }}>
-                <CardActionArea component={Link} href={`/${featured.slug}`}>
+      <main className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* 头条区域 */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+            {/* 主头条 */}
+            {featured ? (
+              <Link href={`/${featured.slug}`} className="lg:col-span-2 group">
+                <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden">
                   {featured.image_url && (
-                    <CardMedia
-                      component="img"
-                      height="300"
-                      image={featured.image_url}
+                    <Image
+                      src={featured.image_url}
                       alt={featured.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition duration-300"
                     />
                   )}
-                  <CardContent>
-                    <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                      {featured.league && <Chip label={featured.league} size="small" />}
-                      {featured.score && <Chip label={featured.score} size="small" variant="outlined" />}
-                    </Box>
-                    <Typography variant="h5" gutterBottom>{featured.title}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {featured.team_a} vs {featured.team_b}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    {featured.league && (
+                      <span className="inline-block bg-primary text-white text-xs font-bold px-2 py-1 rounded mb-2">
+                        {featured.league}
+                      </span>
+                    )}
+                    <h1 className="text-white text-2xl lg:text-3xl font-bold leading-tight">
+                      {featured.title}
+                    </h1>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="lg:col-span-2 aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">暂无头条文章</p>
+              </div>
             )}
 
-            {/* 文章列表 */}
-            <Typography variant="h6" gutterBottom>最新文章</Typography>
-            <Grid container spacing={2}>
-              {restArticles.map((article) => (
-                <Grid item xs={12} sm={6} key={article.id}>
-                  <Card>
-                    <CardActionArea component={Link} href={`/${article.slug}`}>
-                      {article.image_url && (
-                        <CardMedia
-                          component="img"
-                          height="140"
-                          image={article.image_url}
-                          alt={article.title}
-                        />
-                      )}
-                      <CardContent>
-                        {article.league && <Chip label={article.league} size="small" sx={{ mb: 1 }} />}
-                        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                          {article.title}
-                        </Typography>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-
-            {articles.length === 0 && (
-              <Paper sx={{ p: 4, textAlign: 'center' }}>
-                <Typography color="text.secondary">暂无文章，请先生成内容</Typography>
-              </Paper>
-            )}
-          </Grid>
-
-          {/* 侧边栏 */}
-          <Grid item xs={12} md={4}>
-            {/* 赛事列表 */}
-            <Paper sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ p: 2, pb: 1 }}>近期赛事</Typography>
-              <List disablePadding>
-                {matches.map((match, index) => (
-                  <Box key={match.id}>
-                    {index > 0 && <Divider />}
-                    <ListItem>
-                      <ListItemText
-                        primary={`${match.team_a} vs ${match.team_b}`}
-                        secondary={
-                          <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>{match.league}</span>
-                            <span>
-                              {match.status === 'finished'
-                                ? `${match.score_a} - ${match.score_b}`
-                                : match.status === 'live' ? '进行中' : '未开始'}
-                            </span>
-                          </Box>
-                        }
+            {/* 副头条 */}
+            <div className="flex flex-col gap-4">
+              {secondary.map((article) => (
+                <Link key={article.id} href={`/${article.slug}`} className="group flex-1">
+                  <div className="relative h-full min-h-[140px] bg-gray-200 rounded-lg overflow-hidden">
+                    {article.image_url && (
+                      <Image
+                        src={article.image_url}
+                        alt={article.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition duration-300"
                       />
-                    </ListItem>
-                  </Box>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      {article.league && (
+                        <span className="inline-block bg-primary text-white text-xs font-bold px-2 py-1 rounded mb-1">
+                          {article.league}
+                        </span>
+                      )}
+                      <h2 className="text-white text-sm font-bold leading-tight line-clamp-2">
+                        {article.title}
+                      </h2>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+              {secondary.length === 0 && (
+                <div className="flex-1 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500 text-sm">暂无文章</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* 文章列表 */}
+            <div className="lg:col-span-2">
+              <h2 className="text-xl font-bold mb-4 border-l-4 border-primary pl-3">最新资讯</h2>
+              <div className="space-y-4">
+                {rest.map((article) => (
+                  <Link
+                    key={article.id}
+                    href={`/${article.slug}`}
+                    className="flex gap-4 group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
+                  >
+                    <div className="relative w-40 h-24 flex-shrink-0">
+                      {article.image_url ? (
+                        <Image
+                          src={article.image_url}
+                          alt={article.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200" />
+                      )}
+                    </div>
+                    <div className="flex-1 py-2 pr-4">
+                      {article.league && (
+                        <span className="text-primary text-xs font-bold">{article.league}</span>
+                      )}
+                      <h3 className="font-bold text-sm group-hover:text-primary transition line-clamp-2">
+                        {article.title}
+                      </h3>
+                      {article.team_a && article.team_b && (
+                        <p className="text-gray-500 text-xs mt-1">
+                          {article.team_a} vs {article.team_b}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+                {rest.length === 0 && (
+                  <div className="bg-white rounded-lg p-8 text-center text-gray-500">
+                    暂无更多文章
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 侧边栏 - 比分 */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 border-l-4 border-primary pl-3">实时比分</h2>
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                {matches.map((match, index) => (
+                  <div
+                    key={match.id}
+                    className={`p-4 ${index > 0 ? 'border-t border-gray-100' : ''}`}
+                  >
+                    <div className="text-xs text-gray-500 mb-2">{match.league}</div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm">{match.team_a}</span>
+                      <span className="font-bold text-lg">
+                        {match.status === 'finished'
+                          ? `${match.score_a} - ${match.score_b}`
+                          : match.status === 'live'
+                          ? 'LIVE'
+                          : 'VS'}
+                      </span>
+                      <span className="font-medium text-sm">{match.team_b}</span>
+                    </div>
+                    {match.status === 'live' && (
+                      <div className="text-center mt-1">
+                        <span className="inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded animate-pulse">
+                          进行中
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 ))}
                 {matches.length === 0 && (
-                  <ListItem>
-                    <ListItemText secondary="暂无赛事" />
-                  </ListItem>
+                  <div className="p-8 text-center text-gray-500">暂无比赛</div>
                 )}
-              </List>
-            </Paper>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
 
-            {/* 分类 */}
-            <Paper>
-              <Typography variant="h6" sx={{ p: 2, pb: 1 }}>分类</Typography>
-              <Box sx={{ p: 2, pt: 0, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {leagues.map((league) => (
-                  <Chip
-                    key={league.league}
-                    label={`${league.league} (${league.count})`}
-                    clickable
-                    component={Link}
-                    href={`/category/${league.league}`}
-                  />
-                ))}
-                {leagues.length === 0 && (
-                  <Typography variant="body2" color="text.secondary">暂无分类</Typography>
-                )}
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+      <Footer />
+    </div>
   );
 }
