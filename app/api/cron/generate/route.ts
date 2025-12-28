@@ -211,9 +211,9 @@ async function generateArticle(type: ArticleType, input: { league: string; teamA
 }
 
 function generateSlug(league: string, matchDate: string, teamA: string, teamB: string, type: string) {
-  const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/(^-|-$)/g, '');
   const date = matchDate || new Date().toISOString().split('T')[0];
-  return `${slugify(league)}/${date}/${slugify(teamA)}-vs-${slugify(teamB)}-${type}`;
+  const id = Date.now().toString(36);
+  return `${type}/${date}/${id}`;
 }
 
 function generateScore(league: string): string {
