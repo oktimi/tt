@@ -1,18 +1,16 @@
-version: '3.8'
-
 services:
   app:
-    image: ghcr.io/${GITHUB_REPOSITORY}:latest
+    image: ghcr.io/oktimi/tt:${VERSION:-latest}
     ports:
       - "10567:10567"
     environment:
       - DB_HOST=mysql
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USER=root
+      - DB_PASSWORD=root
       - DB_NAME=valuo_sports
-      - CLAUDE_BASE_URL=${CLAUDE_BASE_URL}
-      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
-      - IMAGE_WORKER_URL=${IMAGE_WORKER_URL}
+      - CLAUDE_BASE_URL=https://code.newcli.com/claude/droid
+      - CLAUDE_API_KEY=sk-ant-oat01-3ddcg87AvOpA-NXPh9hcd6Pacpc2G8xHnSgPVAcbGRRFL2QgoTj4sZhggrchhfAAtEMBPYtQ9GVgyCBNEY6WBvMmAfImPAA
+      - IMAGE_WORKER_URL=https://valuo.a-374.workers.dev
     depends_on:
       mysql:
         condition: service_healthy
@@ -21,11 +19,10 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=valuo_sports
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
